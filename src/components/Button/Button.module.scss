@@ -25,6 +25,11 @@
 .title + .icon {
     margin-left: 8px;
 }
+.icon {
+    display: inline-block;
+    text-align: center;
+    width: 24px;
+}
 // button styles
 .rounded {
     border-radius: 999px;
@@ -35,6 +40,7 @@
         background-color: rgba(22, 24, 35, 0.03);
     }
 }
+
 .primary {
     background-color: var(--primary);
     color: var(--while);
