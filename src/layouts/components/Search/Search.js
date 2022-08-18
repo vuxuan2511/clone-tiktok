@@ -4,43 +4,40 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import HeadlessTippy from '@tippyjs/react/headless';
 import classNames from 'classnames/bind';
 
-import * as searchServices from '../../../services/searchService';
 import { Wrapper as PopperWrapper } from '../../../components/Popper';
 import AccountItem from '../../../components/AccountItem';
 import { SearchIcon } from '../../../components/Icons';
-import { useDebounce } from '../../../hooks';
 import styles from './Search.module.scss';
 
-const cx = classNames.bind(styles);
+// import * as searchServices from '../../../services/searchService';
+// import { useDebounce } from '../../../hooks';
 
+const cx = classNames.bind(styles);
 function Search() {
     const [searchValue, setSearchValue] = useState('');
-    const [searchResult, setSearchResult] = useState([]);
-    const [showResult, setShowResult] = useState(false);
     const [loading, setLoading] = useState(false);
-
-    const debouncedValue = useDebounce(searchValue, 500);
-
     const inputRef = useRef();
+    const [showResult, setShowResult] = useState(true);
 
+    const [searchResult, setSearchResult] = useState([]);
     useEffect(() => {
-        if (!debouncedValue.trim()) {
+        if (!searchValue.trim()) {
             setSearchResult([]);
             return;
         }
 
-        const fetchApi = async () => {
-            setLoading(true);
+        setLoading(true);
 
-            const result = await searchServices.search(debouncedValue);
-
-            setSearchResult(result);
-            setLoading(false);
-        };
-
-        fetchApi();
-    }, [debouncedValue]);
-
+        fetch(`https://tiktok.fullstack.edu.vn/api/users/search?q=${encodeURIComponent(searchValue)}&type=less`)
+            .then((res) => res.json())
+            .then((res) => {
+                setSearchResult(res.data);
+                setLoading(false);
+            })
+            .catch(() => {
+                setLoading(false);
+            });
+    }, [searchValue]);
     const handleClear = () => {
         setSearchValue('');
         setSearchResult([]);
@@ -51,16 +48,7 @@ function Search() {
         setShowResult(false);
     };
 
-    const handleChange = (e) => {
-        const searchValue = e.target.value;
-        if (!searchValue.startsWith(' ')) {
-            setSearchValue(searchValue);
-        }
-    };
-
     return (
-        // Using a wrapper <div> tag around the reference element solves
-        // this by creating a new parentNode context.
         <div>
             <HeadlessTippy
                 interactive
@@ -83,7 +71,7 @@ function Search() {
                         value={searchValue}
                         placeholder="Search accounts and videos"
                         spellCheck={false}
-                        onChange={handleChange}
+                        onChange={(e) => setSearchValue(e.target.value)}
                         onFocus={() => setShowResult(true)}
                     />
                     {!!searchValue && !loading && (
@@ -91,9 +79,9 @@ function Search() {
                             <FontAwesomeIcon icon={faCircleXmark} />
                         </button>
                     )}
+                    {/* <FontAwesomeIcon className={cx('loading')} icon={faSpinner} /> */}
                     {loading && <FontAwesomeIcon className={cx('loading')} icon={faSpinner} />}
-
-                    <button className={cx('search-btn')} onMouseDown={(e) => e.preventDefault()}>
+                    <button className={cx('search-btn')}>
                         <SearchIcon />
                     </button>
                 </div>
